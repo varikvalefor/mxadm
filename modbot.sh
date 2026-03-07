@@ -43,37 +43,29 @@ function over9000 {
 	done
 }
 
-function blam {
+# | ni'o mapti lo nu jostolcru je lo nu xruti pe'a
+function rblam {
 	plicme=$1
 	krinu=$(echo $2 | sed -e 's/"/\\"/g')
+	if [ $4 = 1 ]
+	then
+		lidne="un"
+	fi
+
 	bd="{\"user_id\": \"$plicme\", \"reason\": \"$krinu\"}"
 
 	for i in $(echo $3 | sed -e 's/,/ /g')
 	do
 		for kumfaId in $(cat $HOME/.config/modbot/kumfaid_$i)
 		do
-			c -X POST "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/ban" -d "$bd"
-		done
-	done
-}
-
-function deblam {
-	plicme=$1
-	krinu=$(echo $2 | sed -e 's/"/\\"/g')
-	dbd="{\"user_id\": \"$plicme\", \"reason\": \"$krinu\"}"
-
-	for i in $(echo $3 | sed -e 's/,/ /g')
-	do
-		for kumfaId in $(cat $HOME/.config/modbot/kumfaid_$i)
-		do
-			c -X POST "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/unban" -d "$dbd"
+			c -X POST "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/${lidne}ban" -d "$bd"
 		done
 	done
 }
 
 case "$1" in
-	blam)	blam $2 $3 $4;;
-	deblam)	deblam $2 $3 $4;;
+	blam)	rblam $2 $3 $4 0;;
+	deblam)	rblam $2 $3 $4 1;;
 	over9000)	over9000;;
 	?)	exit
 esac
