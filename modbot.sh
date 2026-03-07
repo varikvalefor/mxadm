@@ -9,7 +9,7 @@ alias c="curl --socks5 127.0.0.1:9050 -H Authorization:\ Bearer\ \"${accessToken
 function ningau {
 	kumfaId="$1"
 	evtx=$(c "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/state")
-	evt=$(echo "$evtx" | jq '.[] | select(.type == "m.room.power_levels")') || echo "shit"
+	evt=$(echo "$evtx" | jq '.[] | select(.type == "m.room.power_levels")')
 	zbas=$(echo "$evtx" | jq '.[] | select(.type == "m.room.create") | .sender')
 	versiio=$(echo "$evtx" | jq '.[] | select(.type == "m.room.create") | .content.room_version | tonumber')
 	evtId="$(echo "$evt" | jq '.event_id')"
