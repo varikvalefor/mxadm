@@ -33,10 +33,47 @@ function vlipaCohe {
 	c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/state/m.room.power_levels" -d "$evt2"
 }
 
-for i in $(ls -1 $HOME/.config/modbot/kumfaid* | perl -pe 's/^.*_(\d+)$/\1/' | grep '^[0-9]*$')
-do
-	for j in $(cat $HOME/.config/modbot/kumfaid_$i)
+function over9000 {
+	for i in $(ls -1 $HOME/.config/modbot/kumfaid* | perl -pe 's/^.*_(\d+)$/\1/' | grep '^[0-9]*$')
 	do
-		vlipaCohe $i $j
+		for j in $(cat $HOME/.config/modbot/kumfaid_$i)
+		do
+			vlipaCohe $i $j
+		done
 	done
-done
+}
+
+function blam {
+	plicme=$1
+	krinu=$(echo $2 | sed -e 's/"/\\"/g')
+	bd="{\"user_id\": \"$plicme\", \"reason\": \"$krinu\"}"
+
+	for i in $(echo $3 | sed -e 's/,/ /g')
+	do
+		for kumfaId in $(cat $HOME/.config/modbot/kumfaid_$i)
+		do
+			c -X POST "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/ban" -d "$bd"
+		done
+	done
+}
+
+function deblam {
+	plicme=$1
+	krinu=$(echo $2 | sed -e 's/"/\\"/g')
+	dbd="{\"user_id\": \"$plicme\", \"reason\": \"$krinu\"}"
+
+	for i in $(echo $3 | sed -e 's/,/ /g')
+	do
+		for kumfaId in $(cat $HOME/.config/modbot/kumfaid_$i)
+		do
+			c -X POST "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/unban" -d "$dbd"
+		done
+	done
+}
+
+case "$1" in
+	blam)	blam $2 $3 $4;;
+	deblam)	deblam $2 $3 $4;;
+	over9000)	over9000;;
+	?)	exit
+esac
