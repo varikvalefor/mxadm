@@ -17,7 +17,7 @@ function vlipaCohe {
 	versiio=$(echo "$evtx" | jq '.[] | select(.type == "m.room.create") | .content.room_version | tonumber')
 	evtId="$(echo "$evt" | jq '.event_id')"
 
-	pilnoLv="{$(cat $HOME/.config/modbot/pwrlv_$1 | perl -pe 's/^([^\s]*)/"\1":/; s/$/,/' | sed -e '$s/,//')}"
+	pilnoLv="{$(cat $HOME/.config/modbot/pwrlv_$i | perl -pe 's/^([^\s]*)/"\1":/; s/$/,/' | sed -e '$s/,//')}"
 
 	# ni'o lo so'i versiio co'e na mapti tu'a lo barda je mu'oi glibau. power level .glibau.
 	# .i fanta lo nu samfli
