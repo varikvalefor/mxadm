@@ -6,7 +6,7 @@ accessToken=$(head -n 1 $HOME/.config/modbot/accesstoken)
 
 alias c="curl --socks5 127.0.0.1:9050 -H Authorization:\ Bearer\ \"${accessToken}\""
 
-function ningau {
+function vlipaCohe {
 	kumfaId="$1"
 	evtx=$(c "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/state")
 	evt=$(echo "$evtx" | jq '.[] | select(.type == "m.room.power_levels")')
@@ -33,5 +33,5 @@ function ningau {
 
 for i in $(cat kumfaid)
 do
-	ningau $i
+	vlipaCohe $i
 done
