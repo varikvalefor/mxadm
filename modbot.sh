@@ -54,7 +54,7 @@ function rblam {
 
 	bd="{\"user_id\": \"$plicme\", \"reason\": \"$krinu\"}"
 
-	for i in $(echo $3 | sed -e 's/,/ /g')
+	for i in $3
 	do
 		for kumfaId in $(cat $HOME/.config/modbot/kumfaid_$i)
 		do
