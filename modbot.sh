@@ -9,14 +9,15 @@ accessToken=$(head -n 1 $HOME/.config/modbot/accesstoken)
 alias c="curl --socks5 127.0.0.1:9050 -H Authorization:\ Bearer\ \"${accessToken}\""
 
 function vlipaCohe {
-	kumfaId="$1"
+	i=$1
+	kumfaId="$2"
 	evtx=$(c "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/state")
 	evt=$(echo "$evtx" | jq '.[] | select(.type == "m.room.power_levels")')
 	zbas=$(echo "$evtx" | jq '.[] | select(.type == "m.room.create") | .sender')
 	versiio=$(echo "$evtx" | jq '.[] | select(.type == "m.room.create") | .content.room_version | tonumber')
 	evtId="$(echo "$evt" | jq '.event_id')"
 
-	pilnoLv="{$(cat pwrlv_1 | perl -pe 's/^([^\s]*)/"\1":/; s/$/,/' | sed -e '$s/,//')}"
+	pilnoLv="{$(cat pwrlv_$1 | perl -pe 's/^([^\s]*)/"\1":/; s/$/,/' | sed -e '$s/,//')}"
 
 	# ni'o lo so'i versiio co'e na mapti tu'a lo barda je mu'oi glibau. power level .glibau.
 	# .i fanta lo nu samfli
@@ -32,7 +33,10 @@ function vlipaCohe {
 	c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/state/m.room.power_levels" -d "$evt2"
 }
 
-for i in $(cat kumfaid)
+for i in $(ls -1 kumfaid* | perl -pe 's/^.*_(\d+)$/\1/' | grep '^[0-9]*$')
 do
-	vlipaCohe $i
+	for j in $(cat kumfaid_$i)
+	do
+		vlipaCohe $i $j
+	done
 done
