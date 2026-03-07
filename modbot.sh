@@ -17,7 +17,7 @@ function vlipaCohe {
 	versiio=$(echo "$evtx" | jq '.[] | select(.type == "m.room.create") | .content.room_version | tonumber')
 	evtId="$(echo "$evt" | jq '.event_id')"
 
-	pilnoLv="{$(cat pwrlv_$1 | perl -pe 's/^([^\s]*)/"\1":/; s/$/,/' | sed -e '$s/,//')}"
+	pilnoLv="{$(cat $HOME/.config/modbot/pwrlv_$1 | perl -pe 's/^([^\s]*)/"\1":/; s/$/,/' | sed -e '$s/,//')}"
 
 	# ni'o lo so'i versiio co'e na mapti tu'a lo barda je mu'oi glibau. power level .glibau.
 	# .i fanta lo nu samfli
@@ -33,9 +33,9 @@ function vlipaCohe {
 	c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/state/m.room.power_levels" -d "$evt2"
 }
 
-for i in $(ls -1 kumfaid* | perl -pe 's/^.*_(\d+)$/\1/' | grep '^[0-9]*$')
+for i in $(ls -1 $HOME/.config/modbot/kumfaid* | perl -pe 's/^.*_(\d+)$/\1/' | grep '^[0-9]*$')
 do
-	for j in $(cat kumfaid_$i)
+	for j in $(cat $HOME/.config/modbot/kumfaid_$i)
 	do
 		vlipaCohe $i $j
 	done
