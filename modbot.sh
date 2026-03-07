@@ -6,11 +6,6 @@ accessToken=$(head -n 1 $HOME/.config/modbot/accesstoken)
 
 alias c="curl --socks5 127.0.0.1:9050 -H Authorization:\ Bearer\ \"${accessToken}\""
 
-function evtId {
-	evtId=$(c "https://$kibysehu/_matrix/client/v3/rooms/$1/state")
-	evtId=$(echo $evtId | jq '.[] | select(.type == "m.room.power_levels") | .event_id')
-}
-
 function ningau {
 	kumfaId="$1"
 	evtx=$(c "https://$kibysehu/_matrix/client/v3/rooms/$1/state")
