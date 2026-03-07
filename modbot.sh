@@ -30,7 +30,6 @@ function vlipaCohe {
 	evt2=$(echo "$evt" | jq ".users |= $pilnoLv | .content.users |= $pilnoLv | del(.event_id,.room_id,.origin_server_ts,.sender) | del(.unsigned,.prev_content)")
 
 	c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/state/m.room.power_levels" -d "$evt2"
-
 }
 
 for i in $(cat kumfaid)
