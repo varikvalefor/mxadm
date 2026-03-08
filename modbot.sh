@@ -64,8 +64,8 @@ function rblam {
 }
 
 case "$1" in
-	blam)	rblam $2 $3 $4 0;;
-	deblam)	rblam $2 $3 $4 1;;
+	blam)	rblam $2 "$3" "$4" 0;;
+	deblam)	rblam $2 "$3" "$4" 1;;
 	over9000)	over9000;;
 	?)	exit
 esac
