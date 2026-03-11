@@ -63,9 +63,25 @@ function rblam {
 	done
 }
 
+function viz {
+	for i in $1
+	do
+		n=$(cat $HOME/.config/modbot/viz_$1)
+
+		vd="{\"history_visibility\":\"$n\"}"
+
+		for kumfaId in $(cat $HOME/.config/modbot/kumfaid_$i)
+		do
+			echo $vd
+			c -X PUT "https://$kibysehu//_matrix/client/v3/rooms/$kumfaId/state/m.room.history_visibility/" -d "$vd"
+		done
+	done
+}
+
 case "$1" in
 	blam)	rblam $2 "$3" "$4" 0;;
 	deblam)	rblam $2 "$3" "$4" 1;;
 	over9000)	over9000;;
+	viz)	viz "$2";;
 	?)	exit
 esac
