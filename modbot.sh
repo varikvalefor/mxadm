@@ -78,10 +78,23 @@ function viz {
 	done
 }
 
+function joinRules {
+	for i in $1
+	do
+		vd=$(cat ~/.config/modbot/joinrules_$1 | sed -e 's/^/{"room_id": "/' | sed -e 's/$/", "type": "m.room_membership"}/' | jq -s)
+		vd="{\"allow\": $vd, \"join_rule\": \"restricted\"}"
+		for kumfaId in $(cat $HOME/.config/modbot/kumfaid_$i)
+		do
+			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/state/m.room.join_rules/" --data-raw "$vd"
+		done
+	done
+}
+
 case "$1" in
 	blam)	rblam $2 "$3" "$4" 0;;
 	deblam)	rblam $2 "$3" "$4" 1;;
 	over9000)	over9000;;
 	viz)	viz "$2";;
+	joinRules)	joinRules "$2";;
 	?)	exit
 esac
