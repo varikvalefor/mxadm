@@ -81,7 +81,7 @@ function viz {
 function joinRules {
 	for i in $1
 	do
-		vd=$(cat ~/.config/modbot/joinrules_$1 | sed -e 's/^/{"room_id": "/' | sed -e 's/$/", "type": "m.room_membership"}/' | jq -s)
+		vd=$(cat ~/.config/modbot/joinrules_$i | sed -e 's/^/{"room_id": "/' | sed -e 's/$/", "type": "m.room_membership"}/' | jq -s)
 		vd="{\"allow\": $vd, \"join_rule\": \"restricted\"}"
 		for kumfaId in $(cat $HOME/.config/modbot/kumfaid_$i)
 		do
