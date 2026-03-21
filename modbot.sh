@@ -44,6 +44,8 @@ function over9000 {
 }
 
 # | ni'o mapti lo nu jostolcru je lo nu xruti pe'a
+#
+# .i cumki fa lo nu xruti pe'a  .i ku'i zo pe'a vajni  .i la .varik. cu kajde fi le su'u cumki fa lo xrani be lo prenu
 function rblam {
 	plicme=$1
 	krinu=$(echo $2 | sed -e 's/"/\\"/g')
