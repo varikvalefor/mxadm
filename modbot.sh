@@ -21,7 +21,7 @@ function vlipaCohe {
 
 	# ni'o lo so'i versiio co'e na mapti tu'a lo barda je mu'oi glibau. power level .glibau.
 	# .i fanta lo nu samfli
-	if [ $versiio -lt 12 ]
+	if [ "$versiio" -lt 12 ]
 	then
 		pilnoLv=$(echo "$pilnoLv" | jq "map_values(if . > 100 then 100 else . end)")
 	else
