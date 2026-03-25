@@ -34,7 +34,7 @@ function vlipaCohe {
 }
 
 function over9000 {
-	for i in $(ls -1 $HOME/.config/modbot/kumfaid* | perl -pe 's/^.*_(\d+)$/\1/' | grep '^[0-9]*$')
+	for i in $1
 	do
 		for j in $(cat $HOME/.config/modbot/kumfaid_$i)
 		do
@@ -95,7 +95,7 @@ function joinRules {
 case "$1" in
 	blam)	rblam $2 "$3" "$4" 0;;
 	deblam)	rblam $2 "$3" "$4" 1;;
-	over9000)	over9000;;
+	over9000)	over9000 "$2";;
 	viz)	viz "$2";;
 	joinRules)	joinRules "$2";;
 	?)	exit
