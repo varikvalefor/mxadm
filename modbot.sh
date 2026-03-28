@@ -28,11 +28,9 @@ function vlipaCohe {
 		pilnoLv=$(echo "$pilnoLv" | jq "del(.$zbas)")
 	fi
 
-	pilnoLv=$(echo $pilnoLv | sed -e 's/^{//')
+	evt2=$(cat "$HOME/.config/modbot/pwrlvl_$i" | jq ".users |= $pilnoLv | .content.users |= $pilnoLv")
 
-	evt2=$(cat "$HOME/.config/modbot/pwrlvl_$i"; echo "$pilnoLv"; echo "}")
-
-	c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/state/m.room.power_levels" -d "$evt2"
+	echo "$evt2" # c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/state/m.room.power_levels" -d "$evt2"
 }
 
 function over9000 {
