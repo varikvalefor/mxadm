@@ -28,7 +28,9 @@ function vlipaCohe {
 		pilnoLv=$(echo "$pilnoLv" | jq "del(.$zbas)")
 	fi
 
-	evt2=$(echo "$evt" | jq ".users |= $pilnoLv | .content.users |= $pilnoLv | del(.event_id,.room_id,.origin_server_ts,.sender) | del(.unsigned,.prev_content)")
+	pilnoLv=$(echo $pilnoLv | sed -e 's/^{//')
+
+	evt2=$(cat "$HOME/.config/modbot/pwrlvl_$i"; echo "$pilnoLv"; echo "}")
 
 	c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/state/m.room.power_levels" -d "$evt2"
 }
