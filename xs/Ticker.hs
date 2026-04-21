@@ -67,14 +67,12 @@ data Cfg = Cfg {
 
 
 httpBS' :: Request -> IO HttpDanfu;
-httpBS' = fmap ((\r -> f r $ getResponseStatusCode r)) . httpBS
+httpBS' = fmap (\r -> f r $ getResponseStatusCode r) . httpBS
   where
   {
     f :: Response B8.ByteString -> Int -> HttpDanfu;
     f r c = if c `mod` 100 /= 2 then Left $ HttpErr (fromIntegral c) else Right r;
   };
-
-
 
 wAuth :: Cfg -> Request -> Request;
 wAuth c = addRequestHeader "Authorization" ckiku
@@ -83,19 +81,22 @@ wAuth c = addRequestHeader "Authorization" ckiku
     ckiku = B8.pack $ "Bearer " ++ accessToken c;
   };
 
-
-
 httpBSc :: Cfg -> Request -> IO HttpDanfu;
 httpBSc c = httpBS' . wAuth c;
 
-
-
-mxEndpoint :: Cfg -> String -> B8.ByteString -> BSL.ByteString -> Maybe Request;
-mxEndpoint c u r b = fmap f $ parseRequest $ homeserverUri c ++ u
+-- mx. endpoint
+-- "the destination"
+mxEndpoint :: Cfg
+           -> String
+           -> B8.ByteString
+           -> BSL.ByteString
+           -> Query
+           -> Maybe Request;
+mxEndpoint c u r b k = fmap f $ parseRequest $ homeserverUri c ++ u
   where
   {
     f :: Request -> Request;
-    f = wAuth c . setRequestMethod r . setRequestBodyLBS b;
+    f = wAuth c . setRequestQueryString k . setRequestMethod r . setRequestBodyLBS b;
   };
 
 
@@ -140,16 +141,14 @@ sync c = either Left (sGenturfahi c) <$> syncHttp
       where
       {
         r :: Maybe Request;
-        r = mxEndpoint c ("/_matrix/client/v3/sync" ++ faff) "" ""
-          where
-          {
-            faff = (let sinceS = maybe "" ("since=" ++) $ since c in
-                    let sf x = if null sinceS then [] else x ++ sinceS in
-                    maybe
-                      (sf "?")
-                      (\f -> "?filter=" ++ f ++ sf "&")
-                      (filterId c));
-          };
+        r = (mxEndpoint
+              c
+              ("/_matrix/client/v3/sync")
+              ""
+              ""
+              (catMaybes
+                [("since",) . Just . B8.pack <$> (since c :: Maybe String),
+                 ("filter",) . Just . B8.pack <$> filterId c]));
       };
   };
 
