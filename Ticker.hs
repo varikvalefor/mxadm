@@ -131,9 +131,10 @@ sync c = either Left (sGenturfahi c) <$> syncHttp
             r :: Maybe Request;
             r = ((parseRequest . concat)
                  [(homeserverUri c ++ "/_matrix/client/v3/sync"),
-                  (maybe
-                    (if null sinceS then [] else "?" ++ sinceS)
-                    (\f -> "?filter=" ++ f ++ if null sinceS then [] else "&" ++ sinceS)
+                  (let sf x = if null sinceS then [] else x ++ sinceS in
+                   maybe
+                    (sf "?")
+                    (\f -> "?filter=" ++ f ++ sf "&")
                     (filterId c))])
               where
               {
