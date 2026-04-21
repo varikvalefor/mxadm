@@ -90,6 +90,16 @@ httpBSc c = httpBS' . wAuth c;
 
 
 
+mxEndpoint :: Cfg -> String -> B8.ByteString -> BSL.ByteString -> Maybe Request;
+mxEndpoint c u r b = fmap f $ parseRequest $ homeserverUri c ++ u
+  where
+  {
+    f :: Request -> Request;
+    f = wAuth c . setRequestMethod r . setRequestBodyLBS b;
+  };
+
+
+
 sGenturfahi :: Cfg -> String -> FlibaC (Cfg, [Msg]);
 sGenturfahi c = maybe srera (Right . selbehi) . d
   where
