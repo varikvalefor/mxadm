@@ -140,14 +140,16 @@ sync c = either Left (sGenturfahi c) <$> syncHttp
       where
       {
         r :: Maybe Request;
-        r = ((parseRequest . concat)
-             [(homeserverUri c ++ "/_matrix/client/v3/sync"),
-              (let sinceS = maybe "" ("since=" ++) $ since c in
-               let sf x = if null sinceS then [] else x ++ sinceS in
-               maybe
-                (sf "?")
-                (\f -> "?filter=" ++ f ++ sf "&")
-                (filterId c))]);
+        r = mxEndpoint c ("/_matrix/client/v3/sync" ++ faff) "" ""
+          where
+          {
+            faff = (let sinceS = maybe "" ("since=" ++) $ since c in
+                    let sf x = if null sinceS then [] else x ++ sinceS in
+                    maybe
+                      (sf "?")
+                      (\f -> "?filter=" ++ f ++ sf "&")
+                      (filterId c));
+          };
       };
   };
 
