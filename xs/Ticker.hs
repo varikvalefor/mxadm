@@ -171,11 +171,11 @@ doit c m = case find (flip mapti m) $ fs c of
 
 ticker :: Cfg -> IO ();
 ticker c = sync c >>= either (\x -> print x >> ticker c) (uncurry lp)
-    where
-    {
-      lp :: Cfg -> [Msg] -> IO ();
-      lp c' m = mapM_ (doit c') m >>
-                rejgauCfg c' c' >>
-                threadDelay (milsniduCoDenpa c') >>
-                ticker c';
-    };
+  where
+  {
+    lp :: Cfg -> [Msg] -> IO ();
+    lp c' m = mapM_ (doit c') m >>
+              rejgauCfg c' c' >>
+              threadDelay (milsniduCoDenpa c') >>
+              ticker c';
+  };
