@@ -83,6 +83,20 @@ httpBS' = fmap ((\r -> f r $ getResponseStatusCode r)) . httpBS
 
 
 
+wAuth :: Cfg -> Request -> Request;
+wAuth c = addRequestHeader "Authorization" ckiku
+  where
+  {
+    ckiku = B8.pack $ "Bearer " ++ accessToken c;
+  };
+
+
+
+httpBSc :: Cfg -> Request -> IO HttpDanfu;
+httpBSc c = httpBS' . wAuth c;
+
+
+
 sGenturfahi :: Cfg -> String -> FlibaC (Cfg, [Msg]);
 sGenturfahi c = maybe srera (Right . selbehi) . d
   where
@@ -118,26 +132,19 @@ sync c = either Left (sGenturfahi c) <$> syncHttp
     syncHttp :: IO (FlibaC String);
     syncHttp = (maybe
                  (pure $ Left $ HttpErr 0)
-                 (fmap (fmap $ B8.unpack . getResponseBody) . httpBS')
-                 r')
+                 (fmap (fmap $ B8.unpack . getResponseBody) . httpBSc c)
+                 r)
       where
       {
-        r' :: Maybe Request;
-        r' = addRequestHeader "Authorization" ckiku <$> r
-          where
-          {
-            ckiku = B8.pack $ "Bearer " ++ accessToken c;
-
-            r :: Maybe Request;
-            r = ((parseRequest . concat)
-                 [(homeserverUri c ++ "/_matrix/client/v3/sync"),
-                  (let sinceS = maybe "" (("?" ++) . ("since=" ++)) $ since c in
-                   let sf x = if null sinceS then [] else x ++ sinceS in
-                   maybe
-                    (sf "?")
-                    (\f -> "?filter=" ++ f ++ sf "&")
-                    (filterId c))]);
-          };
+        r :: Maybe Request;
+        r = ((parseRequest . concat)
+             [(homeserverUri c ++ "/_matrix/client/v3/sync"),
+              (let sinceS = maybe "" (("?" ++) . ("since=" ++)) $ since c in
+               let sf x = if null sinceS then [] else x ++ sinceS in
+               maybe
+                (sf "?")
+                (\f -> "?filter=" ++ f ++ sf "&")
+                (filterId c))]);
       };
   };
 
