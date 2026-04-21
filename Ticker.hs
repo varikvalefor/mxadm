@@ -55,6 +55,7 @@ data Msg = Msg {
 };
 
 data Cfg = Cfg {
+  rejgauCfg :: Cfg -> IO (),
   milsniduCoDenpa :: Int,
   homeserverUri :: String,
   accessToken :: String,
@@ -62,14 +63,6 @@ data Cfg = Cfg {
   since :: Maybe String,
   fs :: [TFancu]
 };
-
-
-
-getCfg :: IO (FlibaC Cfg);
-getCfg = undefined;
-
-rejgauCfg :: Cfg -> IO (Maybe ErrorCode);
-rejgauCfg = undefined;
 
 
 
@@ -171,7 +164,7 @@ ticker c = sync c >>= either (\x -> print x >> ticker c) (uncurry lp)
     {
       lp :: Cfg -> [Msg] -> IO ();
       lp c' m = mapM_ (doit c') m >>
-                rejgauCfg c' >>
+                rejgauCfg c' c' >>
                 threadDelay (milsniduCoDenpa c') >>
                 ticker c';
     };
