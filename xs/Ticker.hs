@@ -7,15 +7,12 @@ import Rooms (Sync, ClientEventNoRoomId);
 
 import Data.List;
 import Data.Maybe;
-import Control.Lens;
 import Control.Monad;
-import Data.Aeson.Lens;
 import Network.HTTP.Simple;
 
-import Control.Concurrent;
+import Data.Aeson as A;
 
-import qualified Data.Aeson as A;
-import qualified Data.Aeson.Lens as A;
+import Control.Concurrent;
 
 import qualified Data.Text as T;
 import qualified Data.Text.Internal.Lazy as T;
