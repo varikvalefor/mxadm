@@ -147,7 +147,7 @@ sync c = either Left (sGenturfahi c) <$> syncHttp
               ""
               ""
               (catMaybes
-                [("since",) . Just . B8.pack <$> (since c :: Maybe String),
+                [("since",) . Just . B8.pack <$> since c,
                  ("filter",) . Just . B8.pack <$> filterId c]));
       };
   };
