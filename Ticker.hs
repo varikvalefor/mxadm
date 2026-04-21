@@ -133,7 +133,7 @@ sync c = either Left (sGenturfahi c) <$> syncHttp
                  [(homeserverUri c ++ "/_matrix/client/v3/sync"),
                   (maybe
                     (if null sinceS then [] else "?" ++ sinceS)
-                    (\f -> "?filter=" ++ if null sinceS then [] else "&" ++ sinceS)
+                    (\f -> "?filter=" ++ f ++ if null sinceS then [] else "&" ++ sinceS)
                     (filterId c))])
               where
               {
