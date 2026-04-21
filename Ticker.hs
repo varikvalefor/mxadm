@@ -153,7 +153,10 @@ doit c m = case find (flip mapti m) $ fs c of
   where
   {
     ef' :: Maybe DanfuFancu -> Cfg -> HttpDanfu -> IO ();
-    ef' ef c = fromMaybe (\_ _ -> either print (\_ -> pure ())) ef c m;
+    ef' ef c = fromMaybe d ef c m
+      where {
+        d _ _ = either print $ \_ -> pure ();
+      };
   };
 
 
