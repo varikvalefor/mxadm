@@ -141,7 +141,7 @@ sync c = either Left (sGenturfahi c) <$> syncHttp
         r = (mxEndpoint
               c
               ("/_matrix/client/v3/sync")
-              ""
+              "GET"
               ""
               (catMaybes
                 [("since",) . Just . B8.pack <$> since c,
