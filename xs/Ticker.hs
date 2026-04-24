@@ -144,7 +144,7 @@ sync c = either Left (sGenturfahi c) <$> syncHttp
               "GET"
               ""
               (catMaybes
-                (let ksf k f = (k,) . Just . B.pack <$> f c in
+                (let ksf k f = (k,) . Just . B8.pack <$> f c in
                  [ksf "since" since,
                  ksf "filter" filterId])));
       };
