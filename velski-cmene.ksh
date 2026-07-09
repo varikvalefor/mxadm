@@ -2,9 +2,9 @@
 
 alias echo="echo -E"
 
-echo ".i sarcu fa tu'a lo cmene be lo kibyse'u / A server name is necessary.">&1; exit
+echo ".i sarcu fa tu'a lo cmene be lo kibyse'u / A server name is necessary.">&2; exit
 kibysehu=
-echo ".i sarcu fa tu'a lo me'oi .Matrix. judri / An MXID is necessary.">&1; exit
+echo ".i sarcu fa tu'a lo me'oi .Matrix. judri / An MXID is necessary.">&2; exit
 plicme=
 
 accessToken=$(head -n 1 $HOME/.config/modbot/accesstoken)
