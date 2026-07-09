@@ -16,7 +16,7 @@ alias c="curl --retry 20 $proxyJank -H Authorization:\ Bearer\ \"${accessToken}\
 function doit {
         kumfaId="$1"
         velskiCmene="$2"
-        evt=$(c "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/joined_members" | jq ".joined.\"$mxid\"" | jq ".displayname = \"$velskiCmene\" | .membership = \"join\"")
+        evt=$(c "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/joined_members" | jq ".joined.\"$mxid\" | .displayname = \"$velskiCmene\" | .membership = \"join\"")
         c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/state/m.room.member/$plicme" -d "$evt"
 }
 
