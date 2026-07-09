@@ -24,5 +24,5 @@ mxid="$1"
 
 while read kumfaId
 do
-	doit "kumfaId" "$1"
+	doit "$kumfaId" "$1"
 done
