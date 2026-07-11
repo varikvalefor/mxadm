@@ -191,7 +191,7 @@ function lupe {
 		elif [ "$bod" = "!mxadm help" ]
 		then
 			kumfaId=$(echo "$i" | jq -r '.roomid')
-			notci="!mxadm help - displays commands\\n!mxadm ticket moderator - creates moderator ticket\\n!mxadm ticket verify - creates verification ticket\\n!mxadm ticket incident - creates incident ticket\\n!mxadm divinationbyquote - outputs quote from varik's quote list\\n!mxadm [secret] - easter eggs and whatnot\\n\\n.i la .varik. cu kajde fi zo'e joi le su'u le proga cu co'e ja tolmapti lo se stika pe'a je notci... je cu milxe le ka ce'u masno\\n\\nVARIK cautions.  The bot is incompatible/whatever with messages which are \\\"edited\\\".  Additionally, the bot is somewhat slow."
+			notci="!mxadm help - displays commands\\n!mxadm ticket moderator - creates moderator ticket\\n!mxadm ticket verify - creates verification ticket\\n!mxadm ticket incident - creates incident ticket\\n!mxadm divinationbyquote - outputs quote from varik's quote list\\n!mxadm hoot - ditto\\n!mxadm [secret] - easter eggs and whatnot\\n\\n.i la .varik. cu kajde fi zo'e joi le su'u le proga cu co'e ja tolmapti lo se stika pe'a je notci... je cu milxe le ka ce'u masno\\n\\nVARIK cautions.  The bot is incompatible/whatever with messages which are \\\"edited\\\".  Additionally, the bot is somewhat slow."
 			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"$notci\"}"
 		elif [ "$bod" = "!mxadm slowmode enable" ]; then if isModerator "$(echo -E $i | jq -r '.sender')"
 		then
@@ -214,7 +214,7 @@ function lupe {
 		then
 			kumfaId=$(echo "$i" | jq -r '.roomid')
 			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "$(cat brick)"
-		elif [ "$bod" = "!mxadm divinationbyquote" ]
+		elif echo "$bod" | pcregrep '^\!mxadm (divinationbyquote|hoot)$'
 		then
 			kumfaId=$(echo "$i" | jq -r '.roomid')
 			glutamate=$(/usr/games/fortune quot | jq -R)
