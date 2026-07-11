@@ -35,12 +35,11 @@ function SYNC {
 	fi
 	echo "$evt"
 }
-		#jq -r 'if .body | test("^\\!mxadm ticket (moderator|verify|incident)$") then .body = (.body | match("\\w+$") | .string) + "|" + .sender else . end';
 
 function syncRq {
 	set -x
 	SYNC |\
-		jq -c '.rooms.join | to_entries[]' | tee "$HOME/.syncs/$(date +%Y%m%d%H%M%S).sync" | jq -cr '.value.timeline.events[] += {roomid: .key} | .value.timeline.events[] | . += {body: .content.body}';# | {sender, roomid, body}';
+		jq -c '.rooms.join | to_entries[]' | tee "$HOME/.syncs/$(date +%Y%m%d%H%M%S).sync" | jq -cr '.value.timeline.events[] += {roomid: .key} | .value.timeline.events[] | . += {body: .content.body}';
 }
 
 function mkTik {
