@@ -13,7 +13,7 @@ kumfaId_jatna=$(cat $HOME/.config/modbot/xkumfaid_jatna)
 accessToken=$(head -n 1 $HOME/.config/modbot/accesstoken)
 
 #alias c="curl --retry 100 -x socks5h://10.255.1.3:9050 -H Authorization:\ Bearer\ \"${accessToken}\""
-alias c="curl --retry 100 -x http://10.255.1.3:4444 -H Authorization:\ Bearer\ \"${accessToken}\""
+alias c="curl --retry-connrefused --retry 100 -x http://10.255.1.3:4444 -H Authorization:\ Bearer\ \"${accessToken}\""
 
 function guido {
         # | ni'o pilno ko'a goi la'o zoi. dd(1) .zoi. ki'u le
@@ -48,6 +48,9 @@ function mkTik {
 
 	klesi=$1;
 	mxid=$2;
+	evtId=$3;
+	benji=$4;
+	kumfaId0=$5;
 
 	if [ "$klesi" = "verify" ]
 	then
@@ -84,6 +87,8 @@ function mkTik {
 	then
 		echo "$mxid" >> $HOME/.config/modbot/vrici-veritas
 	fi
+
+	c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId0/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \".i .indika lo du'u snada joi lo du'u benji lo vi'ecpe notci pe lo me'oi .ticket. ke tavla kumfa pe'a  .i la .varik. cu djica curmi lo nu cusku fi vo'a fe lo se du'u na snada kei kei vo'a kei va'o lo nu na snada  .i la .varik. ci ci'au xo'o nai la'e di'u\n\nStuff indicates that the thing is successful, and an invite message for the ticket chatroom is sent.  In the event of failure, VARIK welcomes stating (to VARIK) that the thing is unsuccessful. to VARIK.  VARIK sincerely writes the preceding sentence.\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
 }
 
 function isTicketRequest {
@@ -93,7 +98,7 @@ function isTicketRequest {
 function slowmode {
         msg=$1
 	benji=$(echo "$msg" | jq '.sender')
-	kumfaId=$(echo "$msg" | jq '.room_id')
+	kumfaId=$(echo "$msg" | jq '.roomid')
 	#kumfaId=$(echo "$msg" | jq '.origin_server_ts')
 
         if (isPrivilegedUser "$(echo \"$msg\" | jq '.sender')")
@@ -161,38 +166,52 @@ function lupe {
 
 		set -x
 		bod=$(echo -E "$i" | jq -r '.body')
-		kumfaId=$(echo -E "$i" | jq '.roomid')
-		klesi=$(echo "$i" | jq '.type')
+		kumfaId=$(echo -E "$i" | jq -r '.roomid')
+		klesi=$(echo "$i" | jq -r '.type')
+		evtId=$(echo "$i" | jq -rc '.event_id')
+		benji=$(echo "$i" | jq -rc '.sender')
+		echo -E "$kumfaId"
 
 		#slowmode "$i"
 
-		if true # [ "$kumfaId" = "!1_lk3HyvX3yeRwbGRyDNzsw6efoN6yoGJRk_YFUCrjo" ] || [ "$kumfaId" = "!utnlbJeRBwvqLUFltM:matrix.org" ]
+		#if echo "$kumfaId" | pcregrep ' ^\!(1_lk3HyvX3yeRwbGRyDNzsw6efoN6yoGJRk_YFUCrjo|utnlbJeRBwvqLUFltM:matrix.org|AI8S21lU11g8rZLtN7IAJmI52017iSOljVkdiQriDHs)$'
+		#then
+			echo "test pass"
+			if isTicketRequest "$bod"
+			then
+				klesi=$(echo -E "$bod" | sed -e 's/^.* //g');
+				mxid=$(echo "$i" | jq -r '.sender')
+				evtId=$(echo "$i" | jq -r '.event_id')
+				benji=$(echo "$i" | jq -r '.sender')
+				mkTik "$klesi" "$mxid" "$evtId" "$benji" "$kumfaId";
+			elif echo "$bod" | pcregrep '^\!mxadm (divinationbyquote|hoot)$'
+			then
+				glutamate=$(/usr/games/fortune quot | jq -R)
+			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": $glutamate, \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
+			elif [ "$bod" = "!mxadm help" ]
+			then
+				kumfaId=$(echo "$i" | jq -r '.roomid')
+				notci="!mxadm help - displays commands\\n!mxadm ticket moderator - creates moderator ticket\\n!mxadm ticket verify - creates verification ticket\\n!mxadm ticket incident - creates incident ticket\\n!mxadm divinationbyquote - outputs quote from varik's quote list\\n!mxadm hoot - ditto\\n!mxadm [secret] - easter eggs and whatnot\\n\\n.i la .varik. cu kajde fi zo'e joi le su'u le proga cu co'e ja tolmapti lo se stika pe'a je notci... je cu milxe le ka ce'u masno\\n\\nVARIK cautions.  The bot is incompatible/whatever with messages which are \\\"edited\\\".  Additionally, the bot is somewhat slow."
+			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"$notci\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
+			fi
+		if false; then :;
+		elif echo "$bod" | pcregrep '^!mxadm ping$'
 		then
-		echo "test pass"
-		if isTicketRequest "$bod"
-		then
-			klesi=$(echo -E "$bod" | sed -e 's/^.* //g');
-			mxid=$(echo "$i" | jq -r '.sender')
-			mkTik "$klesi" "$mxid";
+			set -x
+			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"pong\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
 		elif echo "$klesi" | pcregrep "m\\.room\\.redaction" # .i la'oi .[. smimlu fi le ka ce'u co'e ja tolmapti  .i na jimpe fa la .varik.
 		then
 			set -x
 			notciId=$(echo "$i" | jq -rc '.content.redacts')
-			V=$(cat $HOME/.syncs/* | jq ".value.timeline.events[] | select(.event_id == \"$notciId\")") #base64 | perl -0777pe 's/\s//g')
+			V=$(cat $HOME/.syncs/* | jq ".value.timeline.events[] += {room_id: .key} | .value.timeline.events[] | select(.event_id == \"$notciId\")") #base64 | perl -0777pe 's/\s//g')
 			if [ "$V" ]
 			then
 				V=$(jq -n --arg var "$V" "{\"msgtype\": \"m.text\", \"body\": \"ni'o vimcu pe'a lo notci  .i ku'i benji le velcki be le notci\n\nA message is \\\"deleted\\\".  But the definition of the event is sent.\n\n\" + \$var }")
 				c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/!z9OfPbvrq1riCqwxqIQ9QEdttteNjSFTDswwneMEphE/send/m.room.message/$(guido 32)" -d "$V"
 			fi
-		fi
 		elif (echo "$bod" | grep -i 'sounds like a lot of$')
 		then
 			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"HOOPLA!\"}"
-		elif [ "$bod" = "!mxadm help" ]
-		then
-			kumfaId=$(echo "$i" | jq -r '.roomid')
-			notci="!mxadm help - displays commands\\n!mxadm ticket moderator - creates moderator ticket\\n!mxadm ticket verify - creates verification ticket\\n!mxadm ticket incident - creates incident ticket\\n!mxadm divinationbyquote - outputs quote from varik's quote list\\n!mxadm hoot - ditto\\n!mxadm [secret] - easter eggs and whatnot\\n\\n.i la .varik. cu kajde fi zo'e joi le su'u le proga cu co'e ja tolmapti lo se stika pe'a je notci... je cu milxe le ka ce'u masno\\n\\nVARIK cautions.  The bot is incompatible/whatever with messages which are \\\"edited\\\".  Additionally, the bot is somewhat slow."
-			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"$notci\"}"
 		elif [ "$bod" = "!mxadm slowmode enable" ]; then if isModerator "$(echo -E $i | jq -r '.sender')"
 		then
 			kumfaId=$(echo "$i" | jq -r '.roomid')
@@ -214,11 +233,6 @@ function lupe {
 		then
 			kumfaId=$(echo "$i" | jq -r '.roomid')
 			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "$(cat brick)"
-		elif echo "$bod" | pcregrep '^\!mxadm (divinationbyquote|hoot)$'
-		then
-			kumfaId=$(echo "$i" | jq -r '.roomid')
-			glutamate=$(/usr/games/fortune quot | jq -R)
-			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": $glutamate}"
 #		elif echo "$bod" | pcregrep '^!yesreallyban @.+*:[^\s]+'
 #		then
 #			if echo "$bod" | pcregrep '^!yesreallyban @.+*:[^\s]+\s+[^\s]'
@@ -235,7 +249,7 @@ function lupe {
 #				c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": .i co'e ja djica lo nu cpedu lo se du'u ma kau krinu\\n\\nExplaining the reason is desired/whatever.\"}"
 #			fi
 #		fi
-		fi # kumfaId
+		fi
 	done
 }
 
