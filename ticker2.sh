@@ -12,8 +12,8 @@ kumfaId_jatna=$(cat $HOME/.config/modbot/xkumfaid_jatna)
 
 accessToken=$(head -n 1 $HOME/.config/modbot/accesstoken)
 
-#alias c="curl --retry 100 -x socks5h://10.255.1.3:9050 -H Authorization:\ Bearer\ \"${accessToken}\""
-alias c="curl --retry-connrefused --retry 100 -x http://10.255.1.3:4444 -H Authorization:\ Bearer\ \"${accessToken}\""
+alias c="curl --retry-all-errors --retry 255 -x socks5h://10.255.1.3:9050 -H Authorization:\ Bearer\ \"${accessToken}\""
+#alias c="curl --retry-all-errors --retry 100 -x http://10.255.1.3:4444 -H Authorization:\ Bearer\ \"${accessToken}\""
 
 function guido {
         # | ni'o pilno ko'a goi la'o zoi. dd(1) .zoi. ki'u le
@@ -74,19 +74,21 @@ function mkTik {
 	echo "$evt"
 	kumfaId=$(echo "$evt" | jq -r '.room_id')
 
-	./modbot.sh viz "$kumfaId" cotf-tik1
-	./modbot.sh joinRules "$kumfaId" cotf-tik1
-	./modbot.sh over9000 "$kumfaId" cotf-tik1
+	./modbot.sh viz "$kumfaId" cotf-tik1 &
+	./modbot.sh joinRules "$kumfaId" cotf-tik1 &
+	./modbot.sh over9000 "$kumfaId" cotf-tik1 &
 
-	c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId_ticketSpc/state/m.space.child/$kumfaId" -d "{\"suggested\": \"false\", \"via\": [\"catgirl.cloud\"]}"
-	c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId_oTicketSpc/state/m.space.child/$kumfaId" -d "{\"suggested\": \"false\", \"via\": [\"catgirl.cloud\"]}"
+	c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId_ticketSpc/state/m.space.child/$kumfaId" -d "{\"suggested\": \"false\", \"via\": [\"catgirl.cloud\"]}" &
+	c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId_oTicketSpc/state/m.space.child/$kumfaId" -d "{\"suggested\": \"false\", \"via\": [\"catgirl.cloud\"]}" &
 
-	c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId_jatna/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"new ($klesi ticket) for $mxid\nhttps://matrix.to/#/$kumfaId?via=catgirl.cloud\\ncotfNewTicketKeyword\"}"
+	c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId_jatna/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"new ($klesi ticket) for $mxid\nhttps://matrix.to/#/$kumfaId?via=catgirl.cloud\\ncotfNewTicketKeyword\"}" &
 
 	if [ "$klesiX" = "Verification" ]
 	then
 		echo "$mxid" >> $HOME/.config/modbot/vrici-veritas
 	fi
+
+	wait
 
 	c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId0/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \".i .indika lo du'u snada joi lo du'u benji lo vi'ecpe notci pe lo me'oi .ticket. ke tavla kumfa pe'a  .i la .varik. cu djica curmi lo nu cusku fi vo'a fe lo se du'u na snada kei kei vo'a kei va'o lo nu na snada  .i la .varik. ci ci'au xo'o nai la'e di'u\n\nStuff indicates that the thing is successful, and an invite message for the ticket chatroom is sent.  In the event of failure, VARIK welcomes stating (to VARIK) that the thing is unsuccessful. to VARIK.  VARIK sincerely writes the preceding sentence.\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
 }
@@ -122,6 +124,12 @@ function slowmode {
 
 		./modbot.sh over9000 "$kumfaId" "$(echo \"$kumfaId\" | sha256)"
         fi
+}
+
+function powerLevel {
+	pilnoId=$1
+	x=$(grep "$pilnoId" "$HOME/.config/modbot/pwrlv_cotf-jatna1" | cut -f 2 -d\ )
+	if [ "$x" ]; then echo "$x"; else echo "0"; fi
 }
 
 function isModerator {
@@ -199,6 +207,10 @@ function lupe {
 		then
 			set -x
 			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"pong\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
+		elif echo "$bod" | pcregrep '^!mxadm flush$'
+		then
+			set -x
+			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"Your business is appreciated.\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
 		elif echo "$klesi" | pcregrep "m\\.room\\.redaction" # .i la'oi .[. smimlu fi le ka ce'u co'e ja tolmapti  .i na jimpe fa la .varik.
 		then
 			set -x
@@ -206,7 +218,8 @@ function lupe {
 			V=$(cat $HOME/.syncs/* | jq ".value.timeline.events[] += {room_id: .key} | .value.timeline.events[] | select(.event_id == \"$notciId\")") #base64 | perl -0777pe 's/\s//g')
 			if [ "$V" ]
 			then
-				V=$(jq -n --arg var "$V" "{\"msgtype\": \"m.text\", \"body\": \"ni'o vimcu pe'a lo notci  .i ku'i benji le velcki be le notci\n\nA message is \\\"deleted\\\".  But the definition of the event is sent.\n\n\" + \$var }")
+				D=$(echo "$i" | jq)
+				V=$(jq -n --arg var "$V" --arg dvar "$D" "{\"msgtype\": \"m.text\", \"body\": \"ni'o vimcu pe'a ko'a goi lo notci  .i ku'i benji le velcki be ko'a\n\nA message is \\\"deleted\\\".  But the definition of the event is sent.\n\n\" + \$var + \"\n\n\" + \$dvar }")
 				c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/!z9OfPbvrq1riCqwxqIQ9QEdttteNjSFTDswwneMEphE/send/m.room.message/$(guido 32)" -d "$V"
 			fi
 		elif (echo "$bod" | grep -i 'sounds like a lot of$')
@@ -233,22 +246,51 @@ function lupe {
 		then
 			kumfaId=$(echo "$i" | jq -r '.roomid')
 			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "$(cat brick)"
-#		elif echo "$bod" | pcregrep '^!yesreallyban @.+*:[^\s]+'
-#		then
-#			if echo "$bod" | pcregrep '^!yesreallyban @.+*:[^\s]+\s+[^\s]'
-#			then
-#				c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": .i zoi zoi. !yesreallyunban .zoi. jai fili'a lo nu xruti... pe'a\\n\\n\\\"!unban\\\" facilitates \\\"reverting\\\".\"}"
-#				mxid=$(echo "$bod" | pcregrep -o '@.+*:[^\s]+$')
-#				krinu=$(echo "$bod" | perl -pe 's/^[^\s]+ [^\s]+\s+//')
-#
-#				for jl in $(ls -l $HOME/.config/modbot/pwrlv_cotf-*)
-#				do
-#					./modbot blam "$mxid" "$krinu" "$jl"
-#				done
-#			else
-#				c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": .i co'e ja djica lo nu cpedu lo se du'u ma kau krinu\\n\\nExplaining the reason is desired/whatever.\"}"
-#			fi
-#		fi
+		elif echo "$bod" | pcregrep '^\!mxadm yesreallyban @.*:[^\s]+ \w.*$'
+		then
+			mxid=$(echo "$bod" | cut -f 3 -d\ )
+			krinu=$(echo "$bod" | perl -pe 's/^\!mxadm yesreallyban [^\s]+[\s]//')
+			plb=$(powerLevel "$benji")
+			plm=$(powerLevel "$mxid")
+
+			if ! (isModerator "$benji" && [ "$plb" -gt "$plm" ])
+			then
+				c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \".i rivyzu'e pe'a\\n\\nThe thing is \\\"refused\\\".\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
+			else
+				if [ "$krinu" ] # echo "$bod" | pcregrep '^!yesreallyban @.+*:[^\s]+\s+[^\s]'
+				then
+					c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \".i zoi zoi. !mxadm yesreallyunban .zoi. jai fili'a lo nu xruti... pe'a\\n\\n\\\"!mxadm yesreallyunban\\\" facilitates \\\"reverting\\\".\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
+	
+					for kumfaKlesi in $(ls -1 $HOME/.config/modbot/kumfaid_cotf-* | grep -o 'cotf-.*$'); do
+						./modbot.sh blam "$mxid" "$krinu" "$kumfaKlesi" &
+					done
+				else
+					c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \".i co'e ja djica lo nu cusku lo se du'u ma kau krinu\\n\\nExplaining the reason is desired/whatever.\"}"
+				fi
+			fi
+		elif echo "$bod" | pcregrep '^\!mxadm yesreallyunban @.*:[^\s]+ \w.*$'
+		then
+			mxid=$(echo "$bod" | cut -f 3 -d\ )
+			krinu=$(echo "$bod" | perl -pe 's/^\!mxadm yesreallyban [^\s]+[\s]//')
+			#plb=$(powerLevel "$benji")
+			#plm=$(powerLevel "$mxid")
+
+			if ! (isModerator "$benji") # && [ "$plb" -gt "$plm" ])
+			then
+				c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \".i rivyzu'e pe'a\\n\\nThe thing is \\\"refused\\\".\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
+			else
+				if [ "$krinu" ] # echo "$bod" | pcregrep '^!yesreallyban @.+*:[^\s]+\s+[^\s]'
+				then
+					c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"Yeehaw!\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
+
+					for kumfaKlesi in $(ls -1 $HOME/.config/modbot/kumfaid_cotf-* | grep -o 'cotf-.*$'); do
+						./modbot.sh deblam "$mxid" "$krinu" "$kumfaKlesi" &
+					done
+				else
+					c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \".i co'e ja djica lo nu cusku lo se du'u ma kau krinu\\n\\nExplaining the reason is desired/whatever.\"}"
+				fi
+			fi
+		#fi
 		fi
 	done
 }
