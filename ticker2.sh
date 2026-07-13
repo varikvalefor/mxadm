@@ -148,7 +148,7 @@ function slowmode {
 
 function powerLevel {
 	pilnoId=$1
-	x=$(grep "$pilnoId" "$HOME/.config/modbot/pwrlv_cotf-jatna1" | cut -f 2 -d\ )
+	x=$(grep ^"$pilnoId " "$HOME/.config/modbot/pwrlv_cotf-jatna1" | cut -f 2 -d\ )
 	if [ "$x" ]; then echo "$x"; else echo "0"; fi
 }
 
