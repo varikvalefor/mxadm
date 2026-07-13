@@ -64,6 +64,7 @@ function mkTik {
 
 	if (grep "^$mxid\$" $HOME/.config/modbot/vrici-veritas && [ "$klesiX" = "Verification" ])
 	then
+		c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId0/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \".i .indika lo du'u zasti fa lo me'oi .ticket. pu lo nu benji\n\nStuff indicates that that (a ticket exists) precedes sending the message.\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
 		exit
 	fi
 
@@ -95,6 +96,25 @@ function mkTik {
 
 function isTicketRequest {
 	echo "$1" | pcregrep "^\!mxadm ticket \w+$"
+}
+
+function spuda {
+	kumfaId="$1"
+	evtId="$2"
+	benji="$3"
+	bod="$4"
+
+	if [ "$5" = "1" ]
+	then
+		V="$4"
+	else
+		V="{\"msgtype\": \"m.text\", \"body\": \"$bod\"}"
+
+	fi
+
+	V=$(echo "$V" | jq ".\"m.relates_to\".\"m.in_reply_to\".event_id = \"$evtId\" | .\"m.mentions\".user_ids = [\"$benji\"]")
+
+	c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "$V"
 }
 
 function slowmode {
@@ -191,26 +211,26 @@ function lupe {
 				mxid=$(echo "$i" | jq -r '.sender')
 				evtId=$(echo "$i" | jq -r '.event_id')
 				benji=$(echo "$i" | jq -r '.sender')
-				mkTik "$klesi" "$mxid" "$evtId" "$benji" "$kumfaId";
+				mkTik "$klesi" "$mxid" "$evtId" "$benji" "$kumfaId" &
 			elif echo "$bod" | pcregrep '^\!mxadm (divinationbyquote|hoot)$'
 			then
 				glutamate=$(/usr/games/fortune quot | jq -R)
-			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": $glutamate, \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
+				spuda "$kumfaId" "$evtId" "$benji" "$glutamate"
 			elif [ "$bod" = "!mxadm help" ]
 			then
-				kumfaId=$(echo "$i" | jq -r '.roomid')
 				notci="!mxadm help - displays commands\\n!mxadm ticket moderator - creates moderator ticket\\n!mxadm ticket verify - creates verification ticket\\n!mxadm ticket incident - creates incident ticket\\n!mxadm divinationbyquote - outputs quote from varik's quote list\\n!mxadm hoot - ditto\\n!mxadm [secret] - easter eggs and whatnot\\n\\n.i la .varik. cu kajde fi zo'e joi le su'u le proga cu co'e ja tolmapti lo se stika pe'a je notci... je cu milxe le ka ce'u masno\\n\\nVARIK cautions.  The bot is incompatible/whatever with messages which are \\\"edited\\\".  Additionally, the bot is somewhat slow."
-			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"$notci\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
+				spuda "$kumfaId" "$evtId" "$benji" "$notci"
+			elif echo "$bod" | pcregrep '^!mxadm ping$'
+			then
+				set -x
+				spuda "$kumfaId" "$evtId" "$benji" "pong"
+			elif echo "$bod" | pcregrep '^!mxadm flush$'
+			then
+				set -x
+				spuda "$kumfaId" "$evtId" "$benji" "Your business is appreciated."
 			fi
-		elif echo "$bod" | pcregrep '^!mxadm ping$'
-		then
-			set -x
-			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"pong\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
-		elif echo "$bod" | pcregrep '^!mxadm flush$'
-		then
-			set -x
-			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"Your business is appreciated.\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
-		elif echo "$klesi" | pcregrep "m\\.room\\.redaction" # .i la'oi .[. smimlu fi le ka ce'u co'e ja tolmapti  .i na jimpe fa la .varik.
+		fi
+		if echo "$klesi" | pcregrep "m\\.room\\.redaction" # .i la'oi .[. smimlu fi le ka ce'u co'e ja tolmapti  .i na jimpe fa la .varik.
 		then
 			set -x
 			notciId=$(echo "$i" | jq -rc '.content.redacts')
@@ -223,28 +243,24 @@ function lupe {
 			fi
 		elif (echo "$bod" | grep -i 'sounds like a lot of$')
 		then
-			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"HOOPLA!\"}"
-		elif [ "$bod" = "!mxadm slowmode enable" ]; then if isModerator "$(echo -E $i | jq -r '.sender')"
+			spuda "$kumfaId" "$evtId" "$benji" "HOOPLA!"
+		elif [ "$bod" = "!mxadm slowmode enable" ] && isModerator "$(echo -E \"$i\" | jq -r '.sender')"
 		then
-			kumfaId=$(echo "$i" | jq -r '.roomid')
 			mkdir -p "$HOME/.config/modbot/slowmode/"
 			echo "$kumfaId" > "$HOME/.config/modbot/slowmode/enabled"
 			notci="ni'o tolcru lo nu sutra benji lo notci  .i .aktigau le me'oi .slowmode. co'e\n\nQuickly sending messages is forbidden.  The slowmode thing is enabled."
-			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"$notci\"}"
-		fi # isModerator
+			spuda "$kumfaId" "$evtId" "$benji" "$notci"
 		elif [ "$bod" = "!mxadm slowmode disable" ]; then if isModerator "$(echo \"$i\" | jq -r '.sender')"
 		then
-			kumfaId=$(echo "$i" | jq -r '.roomid')
 			mkdir -p "$HOME/.config/mxadm/modbot/slowmode/"
 			foo=$(cat "$HOME/.config/modbot/slowmode/enabled" | grep -v "kumfaId")
 			echo "$foo" > "$HOME/.config/modbot/slowmode/enabled"
 			notci="ni'o curmi lo nu sutra benji lo notci  .i to'e .aktigau le me'oi .slowmode. co'e\n\nQuickly sending messages is permitted.  The slowmode thing is disabled."
-			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"$notci\"}"
+			spuda "$kumfaId" "$evtId" "$benji" "$notci"
 		fi # isModerator
 		elif [ "$bod" = "!mxadm brick" ]
 		then
-			kumfaId=$(echo "$i" | jq -r '.roomid')
-			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "$(cat brick)"
+			spuda "$kumfaId" "$evtId" "$benji" "$(cat brick)" 1
 		elif echo "$bod" | pcregrep '^\!mxadm yesreallyban @.*:[^\s]+ \w.*$'
 		then
 			mxid=$(echo "$bod" | cut -f 3 -d\ )
@@ -258,13 +274,13 @@ function lupe {
 			else
 				if [ "$krinu" ] # echo "$bod" | pcregrep '^!yesreallyban @.+*:[^\s]+\s+[^\s]'
 				then
-					c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \".i zoi zoi. !mxadm yesreallyunban .zoi. jai fili'a lo nu xruti... pe'a\\n\\n\\\"!mxadm yesreallyunban\\\" facilitates \\\"reverting\\\".\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
+					spuda "$kumfaId" "$evtId" "$benji" ".i zoi zoi. !mxadm yesreallyunban .zoi. jai fili'a lo nu xruti... pe'a\\n\\n\\\"!mxadm yesreallyunban\\\" facilitates \\\"reverting\\\"."
 	
 					for kumfaKlesi in $(ls -1 $HOME/.config/modbot/kumfaid_cotf-* | grep -o 'cotf-.*$'); do
 						./modbot.sh blam "$mxid" "$krinu" "$kumfaKlesi" &
 					done
 				else
-					c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \".i co'e ja djica lo nu cusku lo se du'u ma kau krinu\\n\\nExplaining the reason is desired/whatever.\"}"
+					spuda "$kumfaId" "$evtId" "$benji" ".i co'e ja djica lo nu cusku lo se du'u ma kau krinu\\n\\nExplaining the reason is desired/whatever."
 				fi
 			fi
 		elif echo "$bod" | pcregrep '^\!mxadm yesreallyunban @.*:[^\s]+ \w.*$'
@@ -276,20 +292,18 @@ function lupe {
 
 			if ! (isModerator "$benji") # && [ "$plb" -gt "$plm" ])
 			then
-				c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \".i rivyzu'e pe'a\\n\\nThe thing is \\\"refused\\\".\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
+				spuda "$kumfaId" "$evtId" "$benji" ".i rivyzu'e pe'a\\n\\nThe thing is \\\"refused\\\"."
 			else
 				if [ "$krinu" ] # echo "$bod" | pcregrep '^!yesreallyban @.+*:[^\s]+\s+[^\s]'
 				then
-					c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"Yeehaw!\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
-
+					spuda "$kumfaId" "$evtId" "$benji" "Yeehaw!"
 					for kumfaKlesi in $(ls -1 $HOME/.config/modbot/kumfaid_cotf-* | grep -o 'cotf-.*$'); do
 						./modbot.sh deblam "$mxid" "$krinu" "$kumfaKlesi" &
 					done
 				else
-					c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \".i co'e ja djica lo nu cusku lo se du'u ma kau krinu\\n\\nExplaining the reason is desired/whatever.\"}"
+					spuda "$kumfaId" "$evtId" "$benji" ".i co'e ja djica lo nu cusku lo se du'u ma kau krinu\\n\\nExplaining the reason is desired/whatever."
 				fi
 			fi
-		#fi
 		fi
 	done
 }
