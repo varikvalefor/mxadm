@@ -155,13 +155,12 @@ function powerLevel {
 function isModerator {
 	pilnoId=$1
 
-	[ $(grep "$pilnoId" "$HOME/.config/modbot/pwrlv_cotf-jatna1" | cut -f 2 -d\ ) -gt 50 ]
+	[ "$(powerLevel \"$pilnoId\")" -ge 50 ]
 }
 
 function isPrivilegedUser {
 	pilnoId=$1
-
-	[ $(grep "$pilnoId" "$HOME/.config/modbot/pwrlv_cotf-jatna1" | cut -f 2 -d\ ) -gt 0 ]
+	[ "$(powerLevel \"$pilnoId\")" -gt 0 ]
 }
 
 function slowmodeReset {
