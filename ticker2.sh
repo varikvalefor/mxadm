@@ -182,8 +182,8 @@ function lupe {
 
 		#slowmode "$i"
 
-		#if echo "$kumfaId" | pcregrep ' ^\!(1_lk3HyvX3yeRwbGRyDNzsw6efoN6yoGJRk_YFUCrjo|utnlbJeRBwvqLUFltM:matrix.org|AI8S21lU11g8rZLtN7IAJmI52017iSOljVkdiQriDHs)$'
-		#then
+		if echo "$kumfaId" | pcregrep '^\!(1_lk3HyvX3yeRwbGRyDNzsw6efoN6yoGJRk_YFUCrjo|utnlbJeRBwvqLUFltM:matrix.org|AI8S21lU11g8rZLtN7IAJmI52017iSOljVkdiQriDHs)$'
+		then
 			echo "test pass"
 			if isTicketRequest "$bod"
 			then
@@ -202,7 +202,6 @@ function lupe {
 				notci="!mxadm help - displays commands\\n!mxadm ticket moderator - creates moderator ticket\\n!mxadm ticket verify - creates verification ticket\\n!mxadm ticket incident - creates incident ticket\\n!mxadm divinationbyquote - outputs quote from varik's quote list\\n!mxadm hoot - ditto\\n!mxadm [secret] - easter eggs and whatnot\\n\\n.i la .varik. cu kajde fi zo'e joi le su'u le proga cu co'e ja tolmapti lo se stika pe'a je notci... je cu milxe le ka ce'u masno\\n\\nVARIK cautions.  The bot is incompatible/whatever with messages which are \\\"edited\\\".  Additionally, the bot is somewhat slow."
 			c -X PUT "https://$kibysehu/_matrix/client/v3/rooms/$kumfaId/send/m.room.message/$(guido 32)" -d "{\"msgtype\": \"m.text\", \"body\": \"$notci\", \"m.relates_to\": {\"m.in_reply_to\": {\"event_id\": \"$evtId\"}}, \"m.mentions\": {\"user_ids\": [\"$benji\"]}}"
 			fi
-		if false; then :;
 		elif echo "$bod" | pcregrep '^!mxadm ping$'
 		then
 			set -x
